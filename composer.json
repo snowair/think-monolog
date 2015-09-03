@@ -11,5 +11,10 @@
   ],
   "require": {
     "monolog/monolog": "^1.16@dev"
+  },
+  "autoload": {
+    "files":[
+      "Logger.php","Monolog.php"
+    ]
   }
 }

@@ -6,9 +6,9 @@ ThinkPHP 3.2 集成 monolog
 monolog简介
 ----------
 
-是 Laravel,Symfony,Silex 默认集成的日志库, 同时大量其他框架提供了集成扩展. 
+monolog是 Laravel,Symfony,Silex 默认集成的日志库, 同时大量其他框架提供了集成扩展. 
 
-它最流行的 php log库, 自带超多handler, 长期维护, 稳定更新. 
+它是最流行的 php log库, 自带超多handler, 长期维护, 稳定更新. 
 
 它支持以各种方式记录日志: 记录到文件,mail,nosql,mail,irc,firephp,elasticsearch服务器....
 
@@ -32,7 +32,7 @@ monolog简介
 ### step1
 
 ```
-composer requrie snowair/think-monolog
+composer requrie snowair/think-monolog:dev-master
 ```
 
 ### step2
@@ -87,7 +87,7 @@ class MonologBehavior extends Behavior
         
         
         $stream_handler = $logger->popHandler();
-        $stream_handler = $logger->setLevel(Logger::ERROR);
+        $stream_handler->setLevel(Logger::ERROR);
         $logger->pushHandler($stream_handler); // 注册修改后的stream_handler
         
         $mongodb = new MongoDBHandler(new \Mongo("mongodb://***.***.***.***:27017"), "logs", "prod");
