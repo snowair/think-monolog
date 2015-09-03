@@ -1,0 +1,15 @@
+{
+  "name": "snowair/think-monolog",
+  "description": "ThinkPHP3.2集成monolog",
+  "minimum-stability": "dev",
+  "license": "apache",
+  "authors": [
+    {
+      "name": "朱亚杰",
+      "email": "xcoolcc@gmail.com"
+    }
+  ],
+  "require": {
+    "monolog/monolog": "^1.16@dev"
+  }
+}

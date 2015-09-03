@@ -7,7 +7,7 @@
 namespace Think\Log\Driver;
 
 use Snowair\Think\Logger;
-use Monolog\Logger as Mloger;
+use Monolog\Logger as Mlogger;
 use Think\Log;
 
 class Monolog
@@ -23,37 +23,35 @@ class Monolog
     public function write($log,$destination='') {
         $logger = Logger::getLogger();
         if ($logger->getHandlers()) {
-            $line = count(array_filter(explode("\r\n",$log)));
-            if ($line>1) {
-                $logger->addDebug($log);
+            if (false !== strpos( $log, 'INFO: [ app_begin ] --START--' )) {
+                $logger->addRecord(Mlogger::EMERGENCY,$log);
             }else{
                 $level = strstr($log,':',true);
                 $msg   = ltrim(strstr($log,':'),':');
                 switch ($level){
                     case Log::ERR:
-                        $level=Mloger::ERROR;
-                        break;
-                    case Log::DEBUG:
-                        $level=Mloger::DEBUG;
+                        $level=Mlogger::ERROR;
                         break;
                     case Log::EMERG:
-                        $level=Mloger::EMERGENCY;
+                        $level=Mlogger::EMERGENCY;
                         break;
                     case Log::INFO:
-                        $level=Mloger::INFO;
+                        $level=Mlogger::INFO;
                         break;
                     case Log::WARN:
-                        $level=Mloger::WARNING;
+                        $level=Mlogger::WARNING;
                         break;
                     case Log::NOTICE:
-                        $level=Mloger::NOTICE;
+                        $level=Mlogger::NOTICE;
                         break;
                     case Log::ALERT:
-                        $level=Mloger::ALERT;
+                        $level=Mlogger::ALERT;
                         break;
                     case Log::CRIT:
-                        $level=Mloger::CRITICAL;
+                        $level=Mlogger::CRITICAL;
                         break;
+                    default:
+                        $level=Mlogger::DEBUG;
                 }
                 $logger->addRecord($level,$msg);
             }
