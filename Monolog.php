@@ -24,7 +24,7 @@ class Monolog
         $logger = Logger::getLogger();
         if ($logger->getHandlers()) {
             if (false !== strpos( $log, 'INFO: [ app_begin ] --START--' )) {
-                $logger->addRecord(Mlogger::EMERGENCY,$log);
+                $logger->addRecord(Mlogger::EMERGENCY,"\r\n".$log);
             }else{
                 $level = strstr($log,':',true);
                 $msg   = ltrim(strstr($log,':'),':');

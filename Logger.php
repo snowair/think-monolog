@@ -9,38 +9,39 @@ namespace Snowair\Think;
 use Monolog\Handler\HandlerInterface;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger as Mlogger;
+use Monolog\Processor\WebProcessor;
 
 /**
- * @method Mlogger pushHandler( HandlerInterface $handler) Pushes a handler on to the stack.
- * @method Mlogger pushProcessor( callable $callback)
- * @method Mlogger setHandlers(array $handlers)  Set handlers, replacing all existing ones. If a map is passed, keys will be ignored.
- * @method HandlerInterface popHandler() Pops a handler from the stack
- * @method HandlerInterface[] getHandlers()
- * @method callable popProcessor()
- * @method callable[] getProcessors()
+ * @method static Mlogger pushHandler( HandlerInterface $handler) Pushes a handler on to the stack.
+ * @method static Mlogger pushProcessor( callable $callback)
+ * @method static Mlogger setHandlers(array $handlers)  Set handlers, replacing all existing ones. If a map is passed, keys will be ignored.
+ * @method static HandlerInterface popHandler() Pops a handler from the stack
+ * @method static HandlerInterface[] getHandlers()
+ * @method static callable popProcessor()
+ * @method static callable[] getProcessors()
  *
- * @method bool debug(string $message, array $context = array())
- * @method bool info(string $message, array $context = array())
- * @method bool notice(string $message, array $context = array())
- * @method bool warn(string $message, array $context = array())
- * @method bool warning(string $message, array $context = array())
- * @method bool err(string $message, array $context = array())
- * @method bool error(string $message, array $context = array())
- * @method bool crit(string $message, array $context = array())
- * @method bool critical(string $message, array $context = array())
- * @method bool alert(string $message, array $context = array())
- * @method bool emerg(string $message, array $context = array())
- * @method bool emergency(string $message, array $context = array())
+ * @method static bool debug(string $message, array $context = array())
+ * @method static bool info(string $message, array $context = array())
+ * @method static bool notice(string $message, array $context = array())
+ * @method static bool warn(string $message, array $context = array())
+ * @method static bool warning(string $message, array $context = array())
+ * @method static bool err(string $message, array $context = array())
+ * @method static bool error(string $message, array $context = array())
+ * @method static bool crit(string $message, array $context = array())
+ * @method static bool critical(string $message, array $context = array())
+ * @method static bool alert(string $message, array $context = array())
+ * @method static bool emerg(string $message, array $context = array())
+ * @method static bool emergency(string $message, array $context = array())
  *
- * @method bool addRecord(string $level, $message, array $context = array())
- * @method bool addDebug(string $message, array $context = array())
- * @method bool addInfo(string $message, array $context = array())
- * @method bool addNotice(string $message, array $context = array())
- * @method bool addWarning(string $message, array $context = array())
- * @method bool addError(string $message, array $context = array())
- * @method bool addCritical(string $message, array $context = array())
- * @method bool addAlert(string $message, array $context = array())
- * @method bool addEmergency(string $message, array $context = array())
+ * @method static bool addRecord(string $level, $message, array $context = array())
+ * @method static bool addDebug(string $message, array $context = array())
+ * @method static bool addInfo(string $message, array $context = array())
+ * @method static bool addNotice(string $message, array $context = array())
+ * @method static bool addWarning(string $message, array $context = array())
+ * @method static bool addError(string $message, array $context = array())
+ * @method static bool addCritical(string $message, array $context = array())
+ * @method static bool addAlert(string $message, array $context = array())
+ * @method static bool addEmergency(string $message, array $context = array())
  *
  */
 class Logger
@@ -61,15 +62,24 @@ class Logger
     {
         C('SHOW_PAGE_TRACE',false); // 关闭, 以将日志记录到 \Think\Log::$log
         if (!self::$logger instanceof Mlogger) {
-            self::$logger = new Mlogger('think');
+            self::$logger = new Mlogger('Monolog');
+            $handler = new StreamHandler( C('LOG_PATH').date('y_m_d').'.log', Logger::DEBUG);
+            $handler->getFormatter()->allowInlineLineBreaks();
+            $handler->getFormatter()->ignoreEmptyContextAndExtra();
+            self::$logger->pushProcessor( new WebProcessor() );
+            self::$logger->pushHandler($handler); // 文件
         }
     }
 
     static public function getLogger()
     {
         if (!self::$logger instanceof Mlogger) {
-            self::$logger = new Mlogger('think');
-            self::$logger->pushHandler(new StreamHandler( C('LOG_PATH'), Logger::DEBUG)); // 文件
+            self::$logger = new Mlogger('Monolog');
+            $handler = new StreamHandler( C('LOG_PATH').date('y_m_d').'.log', Logger::DEBUG);
+            $handler->getFormatter()->allowInlineLineBreaks();
+            $handler->getFormatter()->ignoreEmptyContextAndExtra();
+            self::$logger->pushProcessor( new WebProcessor() );
+            self::$logger->pushHandler($handler); // 文件
         }
         return self::$logger;
     }
