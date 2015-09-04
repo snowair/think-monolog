@@ -58,10 +58,10 @@ class Logger
     /** @var  Mlogger */
     static protected $logger;
 
-    public function app_begin( &$param=[] )
+    static public function init()
     {
-        C('SHOW_PAGE_TRACE',false); // 关闭, 以将日志记录到 \Think\Log::$log
         if (!self::$logger instanceof Mlogger) {
+            strtolower(C('LOG_TYPE'))=='monolog' && C('SHOW_PAGE_TRACE',false); // 关闭, 以将日志记录到 \Think\Log::$log
             self::$logger = new Mlogger('Monolog');
             $handler = new StreamHandler( C('LOG_PATH').date('y_m_d').'.log', Logger::DEBUG);
             $handler->getFormatter()->allowInlineLineBreaks();
@@ -73,20 +73,14 @@ class Logger
 
     static public function getLogger()
     {
-        if (!self::$logger instanceof Mlogger) {
-            self::$logger = new Mlogger('Monolog');
-            $handler = new StreamHandler( C('LOG_PATH').date('y_m_d').'.log', Logger::DEBUG);
-            $handler->getFormatter()->allowInlineLineBreaks();
-            $handler->getFormatter()->ignoreEmptyContextAndExtra();
-            self::$logger->pushProcessor( new WebProcessor() );
-            self::$logger->pushHandler($handler); // 文件
-        }
+        self::init();
         return self::$logger;
     }
 
 
     static public function __callStatic( $method, $paramters )
     {
+        self::init();
         if (method_exists( self::$logger, $method )) {
             return call_user_func_array(array(self::$logger,$method), $paramters);
         }

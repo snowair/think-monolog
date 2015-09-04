@@ -26,39 +26,39 @@ monolog是 Laravel,Symfony,Silex 默认集成的日志库, 同时大量其他框
 > 因此, 集成monolog后, 为了能收集到trace数据, 在内部已将 `SHOW_PAGE_TRACE` 设为了 `false`.
 
 
-安装
+安装使用
 ------
 
-### step1
+### 安装
 
 ```
 composer requrie snowair/think-monolog:dev-master
 ```
 
-### step2
+### 使用
 
-在`Common/Conf/tags.php` 中注册一个`app_begin`行为:
+安装完成后, 就可以立即在应用的代码中这样使用 monolog:
 
 ```
-return array(
-    'app_begin'=>array('Snowair\Think\Logger'),
-);
+\Snowair\Think\Logger::debug('这是一条debug日志');
+\Snowair\Think\Logger::info('这是一条info日志');
+\Snowair\Think\Logger::warn('这是一条warn日志');
+\Snowair\Think\Logger::error('这是一条error日志');
 ```
 
-### step3
+自定义
+-------
 
-在 `Common/Conf/config.php` 中把 `LOG_TYPE` 配置设为 `monolog`
+### 默认行为
 
-至此, ThinkPHP默认产生的log, 以及您手动使用 `trace`函数, `Think\Log::write()` 记录的日志都将由monolog的StreamHandler记录(日志级别:debug), 无需额外配置.
+think-monolog 默认向monolog注册了 StreamHandler, 日志级别为debug, 这就是为什么安装后可以直接使用的原因.
+
+既然我们用monolog, 肯定是为了使用其提供的丰富的 handlers. 而不是为了仅仅在文件中记录日志. 下面将通过一个实例说明如何自定义 monolog
 
 
-### step4(可选)
-
-> 既然我们用monolog, 肯定是为了使用其提供的丰富的 handlers. 而不是为了仅仅在文件中记录日志.
+### 示例: 
 
 自己建一个行为类, 在这个行为类中完成 monolog 实例的 handlers 和 processors 的添加.
-
-#### 示例: 
 
 创建 `Common/Behavior/MonologBehavior.class.php` :
 
@@ -75,41 +75,47 @@ class MonologBehavior extends Behavior
 
     public function run( &$params )
     {
-        $logger = Logger::getLogger();
-        
         /**
          think-monolog 默认注册的StreamHandler的日志级别为 debug. 
-         如果你想改变它的级别或者不想使用StreamHandler, 就需要取出这个handler.
+         如果你想改变它的级别或者不想使用StreamHandler, 就需要先取出这个handler.
          假设,我们现在的在生产环境下的日志需求是这样:
-            1. 只想在本地文件中记录Error以上级别的日志, 供常规检查
+            1. 只想在本地文件中记录Error以上级别的日志供常规检查
             2. info 以上的日志向发到外部的 MongoDb 数据库中,供日志监控和分析
+            3. 不记录任何debug信息.
         */
         
+        $logger = Logger::getLogger();
+        $stream_handler = $logger->popHandler();  // 取出 StreamHandler 对象
+        $stream_handler->setLevel(Logger::ERROR); // 重设其日志级别
+        $logger->pushHandler($stream_handler);    // 注册修改后的StreamHandler 对象
         
-        $stream_handler = $logger->popHandler();
-        $stream_handler->setLevel(Logger::ERROR);
-        $logger->pushHandler($stream_handler); // 注册修改后的stream_handler
-        
-        $mongodb = new MongoDBHandler(new \Mongo("mongodb://***.***.***.***:27017"), "logs", "prod");
+        $mongodb = new MongoDBHandler(new \Mongo("mongodb://***.***.***.***:27017"), "logs", "prod", Logger::INFO);
         $logger->pushHandler($mongodb); // 文件
     }
 }
 ```
 
-在`Common/Conf/tags.php` 再增加一个`app_begin`行为:
+在`Common/Conf/tags.php` 增加一个`app_begin`行为:
 
 ```
 return array(
     'app_begin' =>array(
-        'Snowair\Think\Logger',
         'Common\Behavior\MonologBehavior'
         ),
 );
 ```
 
-现在, 你可以像过去一样使用TP的trace函数记录日志, 但所有的trace数据是以**一条日志**的形式记录. 
 
-如果你希望单独记录一些日志, 需要使用 monolog:
+### 接管TP默认trace行为
+
+默认情况, think-monolog 并不会接管ThinkPHP的 trace 逻辑. 二者互不影响.
+
+如果你希望 think-monolog 接管ThinkPHP的trace逻辑, 只需要将 `LOG_TYPE` 配置设为`monolog`.
+这样配置以后, `SHOW_PAGE_TRACE` 将强制关闭, 以便monolog完全接管日志工作.
+
+现在, 你可以像过去一样使用TP的 `trace` 函数记录日志, 所有的trace数据依然是以**一条日志**的形式在请求结束时被monolog记录. 
+
+如果你希望单独记录一些日志, 依然需要使用 monolog:
 
 ```
 \Snowair\Think\Logger::debug('这是一条debug日志');
@@ -120,7 +126,6 @@ return array(
 
 注意: 
 
-1. 行为类的注册顺序不能错.
-2. handler的日志级别设置仅对直接通过 monolog 添加的日志有效. 无论handler的日志级别如何, TP的trace日志一定会被无条件记录.
-
-
+handler的日志级别设置仅对直接通过 monolog 添加的日志有效. 无论handler的日志级别如何, trace 日志一定会被无条件记录.
+ 
+因此, 接管后不建议使用trace函数记录日志.
