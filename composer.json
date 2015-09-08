@@ -1,7 +1,6 @@
 {
   "name": "snowair/think-monolog",
   "description": "ThinkPHP3.2集成monolog",
-  "minimum-stability": "dev",
   "license": "apache",
   "authors": [
     {
@@ -10,7 +9,7 @@
     }
   ],
   "require": {
-    "monolog/monolog": "^1.16@dev"
+    "monolog/monolog": "^1.16"
   },
   "autoload": {
     "files":[
