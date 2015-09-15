@@ -29,6 +29,8 @@ monolog是 Laravel,Symfony,Silex 默认集成的日志库, 同时大量其他框
 安装使用
 ------
 
+[composer中文文档](http://www.kancloud.cn/thinkphp/composer)
+
 ### 安装
 
 ```
